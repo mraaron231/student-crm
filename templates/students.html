@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Student CRM</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='students.js') }}" defer></script>
+</head>
+<body>
+    <main class="page">
+        <header class="page-header">
+            <div>
+                <p class="eyebrow">STUDENT MANAGEMENT</p>
+                <h1>Student CRM</h1>
+                <p class="subtitle">Keep student records organized in one place.</p>
+            </div>
+            <a class="header-link" href="{{ url_for('students') }}">Students</a>
+        </header>
+
+        <section class="summary" aria-label="Student overview">
+            <article class="summary-card">
+                <span class="summary-label">Total students</span>
+                <strong id="student-count">{{ total_students }}</strong>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">Courses represented</span>
+                <strong id="course-count">{{ total_courses }}</strong>
+            </article>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">RECORDS</p>
+                    <h2>Students</h2>
+                </div>
+            </div>
+
+            <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                <p class="status-message {{ 'error' if category == 'error' else '' }}" role="status">{{ message }}</p>
+                {% endfor %}
+            {% endwith %}
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Course</th>
+                            <th scope="col"><span class="visually-hidden">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-list"
+                           data-api-url="{{ url_for('students_api') }}"
+                           data-delete-url="{{ url_for('delete_student', student_id=0) }}">
+                        {% for student in students %}
+                        <tr data-student-id="{{ student.id }}">
+                            <td class="student-name">{{ student.name }}</td>
+                            <td>{{ student.email }}</td>
+                            <td><span class="course-tag">{{ student.course }}</span></td>
+                            <td class="actions">
+                                <form method="post"
+                                      action="{{ url_for('delete_student', student_id=student.id) }}"
+                                      data-delete-form>
+                                    <button class="delete-button" type="submit">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr class="empty-row">
+                            <td colspan="4">No students yet. Add a record below to get started.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel add-panel">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">NEW RECORD</p>
+                    <h2>Add a student</h2>
+                </div>
+            </div>
+            <form class="student-form" method="post" action="{{ url_for('add_student') }}" id="student-form">
+                <label>
+                    Student name
+                    <input type="text" name="name" autocomplete="name" placeholder="e.g. Alex Morgan" required>
+                </label>
+                <label>
+                    Email address
+                    <input type="email" name="email" autocomplete="email" placeholder="alex@example.com" required>
+                </label>
+                <label>
+                    Course
+                    <input type="text" name="course" placeholder="e.g. Biology" required>
+                </label>
+                <button class="add-button" type="submit">Add student</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
